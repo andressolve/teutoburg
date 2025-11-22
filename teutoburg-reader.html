@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teutoburg: The Forest That Stopped Rome</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #2c3e35 0%, #1a1a1a 100%);
+            color: #e0d5c7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .reader-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+            max-width: 100%;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .page-display {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #8b7355;
+            border-radius: 4px;
+            padding: 0;
+            margin-bottom: 0;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            max-width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        .page-display img {
+            max-width: 100%;
+            height: auto;
+            max-height: 98vh;
+            border-radius: 4px;
+            display: block;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #8b7355;
+        }
+
+        button {
+            background: linear-gradient(135deg, #8b6f47 0%, #5d4a2f 100%);
+            color: #fff;
+            border: 2px solid #d4af37;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #a08254 0%, #6e5a3d 100%);
+            border-color: #ffcd38;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        button:disabled {
+            background: #3a3a3a;
+            border-color: #555;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .page-info {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #d4af37;
+            min-width: 120px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            border: 1px solid #8b7355;
+        }
+
+        .keyboard-hint {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #a89968;
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        footer {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem;
+            text-align: center;
+            border-top: 2px solid #8b7355;
+            font-size: 0.85rem;
+            color: #a89968;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .controls {
+                gap: 0.5rem;
+            }
+
+            button {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .page-info {
+                font-size: 1rem;
+                min-width: 100px;
+            }
+
+            .reader-container {
+                padding: 1rem 0.5rem;
+            }
+
+            .page-display {
+                padding: 0.5rem;
+            }
+        }
+
+        .loading {
+            color: #d4af37;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="reader-container">
+        <div class="page-display">
+            <img id="currentPage" src="cover.png" alt="Comic page">
+        </div>
+
+        <div class="controls">
+            <button id="firstBtn" onclick="goToFirst()">⏮️ First</button>
+            <button id="prevBtn" onclick="previousPage()">◀️ Previous</button>
+            <div class="page-info">
+                <span id="pageNumber">1</span> / <span id="totalPages">15</span>
+            </div>
+            <button id="nextBtn" onclick="nextPage()">Next ▶️</button>
+            <button id="lastBtn" onclick="goToLast()">Last ⏭️</button>
+        </div>
+
+        <div class="keyboard-hint">
+            💡 Use arrow keys (← →) or swipe to navigate
+        </div>
+    </div>
+
+    <footer>
+        <p>Battle of Teutoburg Forest, 9 CE</p>
+        <p>Where three Roman legions vanished into the Germanic forest</p>
+    </footer>
+
+    <script>
+        const pages = [
+            'cover.png',
+            'page1.png',
+            'page2.png',
+            'page3.png',
+            'page4.png',
+            'page5.png',
+            'page6.png',
+            'page7.png',
+            'page8.png',
+            'page9.png',
+            'page10.png',
+            'page11.png',
+            'page12.png',
+            'page13.png',
+            'page14.png'
+        ];
+
+        let currentPageIndex = 0;
+        const imgElement = document.getElementById('currentPage');
+        const pageNumberElement = document.getElementById('pageNumber');
+        const totalPagesElement = document.getElementById('totalPages');
+
+        totalPagesElement.textContent = pages.length;
+
+        function updatePage() {
+            imgElement.src = pages[currentPageIndex];
+            pageNumberElement.textContent = currentPageIndex + 1;
+            updateButtons();
+        }
+
+        function updateButtons() {
+            document.getElementById('firstBtn').disabled = currentPageIndex === 0;
+            document.getElementById('prevBtn').disabled = currentPageIndex === 0;
+            document.getElementById('nextBtn').disabled = currentPageIndex === pages.length - 1;
+            document.getElementById('lastBtn').disabled = currentPageIndex === pages.length - 1;
+        }
+
+        function nextPage() {
+            if (currentPageIndex < pages.length - 1) {
+                currentPageIndex++;
+                updatePage();
+            }
+        }
+
+        function previousPage() {
+            if (currentPageIndex > 0) {
+                currentPageIndex--;
+                updatePage();
+            }
+        }
+
+        function goToFirst() {
+            currentPageIndex = 0;
+            updatePage();
+        }
+
+        function goToLast() {
+            currentPageIndex = pages.length - 1;
+            updatePage();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                nextPage();
+            } else if (e.key === 'ArrowLeft') {
+                previousPage();
+            } else if (e.key === 'Home') {
+                goToFirst();
+            } else if (e.key === 'End') {
+                goToLast();
+            }
+        });
+
+        // Touch/swipe support
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        imgElement.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        imgElement.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                nextPage();
+            }
+            if (touchEndX > touchStartX + 50) {
+                previousPage();
+            }
+        }
+
+        // Preload next and previous images for smooth navigation
+        function preloadImages() {
+            pages.forEach((src) => {
+                const img = new Image();
+                img.src = src;
+            });
+        }
+
+        // Initialize
+        updateButtons();
+        preloadImages();
+    </script>
+</body>
+</html>
